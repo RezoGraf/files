@@ -365,9 +365,9 @@ func main() {
 			doneCopyMsg, _ := copyFile(operator[0], operator[1])
 			reply = string("Копирование из каталога " + operator[0] + " в каталог " + operator[1] + " закончилось " + doneCopyMsg)
 
-		case "download":
-			s := GetFile()
-			reply = string(s)
+			// case "download":
+			// 	s := GetFile()
+			// 	reply = string(s)
 
 		}
 
