@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -169,6 +170,67 @@ func (bot *BotAPI) MakeRequest(endpoint string, params url.Values) (APIResponse,
 	return apiResp, nil
 }
 
+type FileBytes struct {
+	Name  string
+	Bytes []byte
+}
+
+type BaseChat struct {
+	ChatID              int64 // required
+	ChannelUsername     string
+	ReplyToMessageID    int
+	ReplyMarkup         interface{}
+	DisableNotification bool
+}
+
+type BaseFile struct {
+	BaseChat
+	File        interface{}
+	FileID      string
+	UseExisting bool
+	MimeType    string
+	FileSize    int
+}
+
+func (file BaseFile) getFile() interface{} {
+	return file.File
+}
+
+func (file BaseFile) params() (map[string]string, error) {
+	params := make(map[string]string)
+
+	if file.ChannelUsername != "" {
+		params["chat_id"] = file.ChannelUsername
+	} else {
+		params["chat_id"] = strconv.FormatInt(file.ChatID, 10)
+	}
+
+	if file.ReplyToMessageID != 0 {
+		params["reply_to_message_id"] = strconv.Itoa(file.ReplyToMessageID)
+	}
+
+	if file.ReplyMarkup != nil {
+		data, err := json.Marshal(file.ReplyMarkup)
+		if err != nil {
+			return params, err
+		}
+
+		params["reply_markup"] = string(data)
+	}
+
+	if file.MimeType != "" {
+		params["mime_type"] = file.MimeType
+	}
+
+	if file.FileSize > 0 {
+		params["file_size"] = strconv.Itoa(file.FileSize)
+	}
+
+	params["disable_notification"] = strconv.FormatBool(file.DisableNotification)
+
+	return params, nil
+}
+
 func (bot *BotAPI) GetFile(config FileConfig) (File, error) {
 	v := url.Values{}
 	v.Add("file_id", config.FileID)
@@ -321,11 +383,12 @@ func main() {
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-
+	// s := tgbotapi.BaseFile(tgbotapi.NewUpdate)
 	// bot.Send(tgbotapi.NewMessage(chatID, fmt.Sprint("Я живой; вот сайты которые буду мониторить: ", SiteList)))
 
 	updates, err := bot.GetUpdatesChan(u)
 
+	bot.GetFile(FileConfig.FileID)
 	for update := range updates {
 		reply := ""
 
@@ -366,7 +429,7 @@ func main() {
 			reply = string("Копирование из каталога " + operator[0] + " в каталог " + operator[1] + " закончилось " + doneCopyMsg)
 
 			// case "download":
-			// 	s := GetFile()
+			// 	s := tgbotapi.GetFile(update.Message.Document)
 			// 	reply = string(s)
 
 		}
