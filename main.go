@@ -3,26 +3,30 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	_ "errors"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
 
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	// tgbotapi "github.com/Syfaro/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 var (
 	fileName string = "123.txt"
 	// processName  string = "notepad.exe"
 	processName2 string
-	oldPath      string = "./1/"
-	newPath      string = "./2/"
-	operator     [2]string
+	// oldPath      string = "./1/"
+	// newPath      string = "./2/"
+	operator [2]string
 )
 
 // -----------Переменные и приветствие бота--------
@@ -46,6 +50,141 @@ var (
 		"все остальные http-коды считаются некорректными\n" +
 		"/kill_notepad - Убить процесс notepad если есть и получить результат"
 )
+
+//------------Загрузка файлов------------------
+type User struct {
+	ID           int    `json:"id"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`     // optional
+	UserName     string `json:"username"`      // optional
+	LanguageCode string `json:"language_code"` // optional
+	IsBot        bool   `json:"is_bot"`        // optional
+}
+
+type BotAPI struct {
+	Token  string `json:"token"`
+	Debug  bool   `json:"debug"`
+	Buffer int    `json:"buffer"`
+
+	Self   User         `json:"-"`
+	Client *http.Client `json:"-"`
+	// contains filtered or unexported fields
+}
+
+type FileConfig struct {
+	FileID string
+}
+
+type File struct {
+	FileID   string `json:"file_id"`
+	FileSize int    `json:"file_size"` // optional
+	FilePath string `json:"file_path"` // optional
+}
+
+type APIResponse struct {
+	Ok          bool                `json:"ok"`
+	Result      json.RawMessage     `json:"result"`
+	ErrorCode   int                 `json:"error_code"`
+	Description string              `json:"description"`
+	Parameters  *ResponseParameters `json:"parameters"`
+}
+
+type ResponseParameters struct {
+	MigrateToChatID int64 `json:"migrate_to_chat_id"` // optional
+	RetryAfter      int   `json:"retry_after"`        // optional
+}
+
+type Error struct {
+	Message string
+	ResponseParameters
+}
+
+func (e Error) Error() string {
+	return e.Message
+}
+
+const (
+	// APIEndpoint is the endpoint for all API methods,
+	// with formatting for Sprintf.
+	APIEndpoint = "https://api.telegram.org/bot%s/%s"
+	// FileEndpoint is the endpoint for downloading a file from Telegram.
+	FileEndpoint = "https://api.telegram.org/file/bot%s/%s"
+)
+
+func (bot *BotAPI) decodeAPIResponse(responseBody io.Reader, resp *APIResponse) (_ []byte, err error) {
+	if !bot.Debug {
+		dec := json.NewDecoder(responseBody)
+		err = dec.Decode(resp)
+		return
+	}
+
+	// if debug, read reponse body
+	data, err := ioutil.ReadAll(responseBody)
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(data, resp)
+	if err != nil {
+		return
+	}
+
+	return data, nil
+}
+
+func (bot *BotAPI) debugLog(context string, v url.Values, message interface{}) {
+	if bot.Debug {
+		log.Printf("%s req : %+v\n", context, v)
+		log.Printf("%s resp: %+v\n", context, message)
+	}
+}
+
+func (bot *BotAPI) MakeRequest(endpoint string, params url.Values) (APIResponse, error) {
+	method := fmt.Sprintf(APIEndpoint, bot.Token, endpoint)
+
+	resp, err := bot.Client.PostForm(method, params)
+	if err != nil {
+		return APIResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	var apiResp APIResponse
+	bytes, err := bot.decodeAPIResponse(resp.Body, &apiResp)
+	if err != nil {
+		return apiResp, err
+	}
+
+	if bot.Debug {
+		log.Printf("%s resp: %s", endpoint, bytes)
+	}
+
+	if !apiResp.Ok {
+		parameters := ResponseParameters{}
+		if apiResp.Parameters != nil {
+			parameters = *apiResp.Parameters
+		}
+		return apiResp, Error{apiResp.Description, parameters}
+	}
+
+	return apiResp, nil
+}
+
+func (bot *BotAPI) GetFile(config FileConfig) (File, error) {
+	v := url.Values{}
+	v.Add("file_id", config.FileID)
+
+	resp, err := bot.MakeRequest("getFile", v)
+	if err != nil {
+		return File{}, err
+	}
+
+	var file File
+	json.Unmarshal(resp.Result, &file)
+
+	bot.debugLog("GetFile", v, file)
+
+	return file, nil
+}
 
 //-------Инициализация бота-------------
 func init() {
@@ -189,6 +328,7 @@ func main() {
 
 	for update := range updates {
 		reply := ""
+
 		if update.Message == nil {
 			continue
 		}
@@ -224,7 +364,13 @@ func main() {
 			}
 			doneCopyMsg, _ := copyFile(operator[0], operator[1])
 			reply = string("Копирование из каталога " + operator[0] + " в каталог " + operator[1] + " закончилось " + doneCopyMsg)
+
+		case "download":
+			s := GetFile()
+			reply = string(s)
+
 		}
+
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
 		bot.Send(msg)
 
@@ -234,4 +380,5 @@ func main() {
 		// copyFile((oldPath + fileName), (newPath + fileName))
 
 	}
+
 }
