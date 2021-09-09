@@ -836,23 +836,6 @@ func main() {
 
 	updates, err := bot.GetUpdatesChan(u)
 
-	photoBytes, err := ioutil.ReadFile("133.gif")
-	if err != nil {
-		panic(err)
-	}
-	photoFileBytes := tgbotapi.FileBytes{
-		Name:  "прыг-скок",
-		Bytes: photoBytes,
-	}
-
-	soobsheniye, err := bot.Send(tgbotapi.NewPhotoUpload(int64(chatID), photoFileBytes))
-	if err != nil {
-		panic(err)
-
-	}
-	s := soobsheniye
-	fmt.Println(s)
-
 	for update := range updates {
 		reply := ""
 
@@ -892,9 +875,28 @@ func main() {
 			doneCopyMsg, _ := copyFile(operator[0], operator[1])
 			reply = string("Копирование из каталога " + operator[0] + " в каталог " + operator[1] + " закончилось " + doneCopyMsg)
 
-			// case "download":
-			// 	s := tgbotapi.GetFile(update.Message.Document)
-			// 	reply = string(s)
+		// case "download":
+		// 	s := tgbotapi.GetFile(update.Message.Document)
+		// 	reply = string(s)
+
+		case "tits":
+			photoBytes, err := ioutil.ReadFile("133.gif")
+			if err != nil {
+				panic(err)
+			}
+			photoFileBytes := tgbotapi.FileBytes{
+				Name:  "прыг-скок",
+				Bytes: photoBytes,
+			}
+
+			message, err := bot.Send(tgbotapi.NewPhotoUpload(int64(chatID), photoFileBytes))
+			if err != nil {
+				panic(err)
+
+			}
+			//------Заглушка на будущее--------
+			fmt.Println(message.Text)
+			reply = string("лови")
 
 		}
 
