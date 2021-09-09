@@ -839,6 +839,33 @@ func main() {
 	for update := range updates {
 		reply := ""
 
+		documentBytes := update.Message.Document
+		documentFileName := update.Message.Document.FileName
+		documentFileBytes := tgbotapi.FileBytes{
+			Name:  "documentFileName",
+			Bytes: documentBytes,
+		}
+		if err != nil {
+			panic(err)
+		}
+		message, err := bot.Send(tgbotapi.NewDocumentUpload(int64(chatID), documentFileBytes))
+		if err != nil {
+			panic(err)
+
+		}
+		//------Заглушка на будущее--------
+		fmt.Println(message.Text)
+
+		if err != nil {
+			panic(err)
+
+		}
+
+		err = ioutil.WriteFile("output.txt", b, 0644)
+		if err != nil {
+			panic(err)
+		}
+
 		if update.Message == nil {
 			continue
 		}
@@ -880,12 +907,13 @@ func main() {
 		// 	reply = string(s)
 
 		case "tits":
-			photoBytes, err := ioutil.ReadFile("133.gif")
+			fileUplodedName := "133.gif"
+			photoBytes, err := ioutil.ReadFile(fileUplodedName)
 			if err != nil {
 				panic(err)
 			}
 			photoFileBytes := tgbotapi.FileBytes{
-				Name:  "прыг-скок",
+				Name:  "fileUplodedName",
 				Bytes: photoBytes,
 			}
 
