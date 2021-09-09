@@ -835,36 +835,52 @@ func main() {
 	// bot.Send(tgbotapi.NewMessage(chatID, fmt.Sprint("Я живой; вот сайты которые буду мониторить: ", SiteList)))
 
 	updates, err := bot.GetUpdatesChan(u)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	m, err := bot.GetFile(tgbotapi.FileConfig{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = ioutil.WriteFile("output.txt", m, 0644)
+	if err != nil {
+		panic(err)
+	}
+	message, err := bot.Send(tgbotapi.NewDocumentUpload(int64(chatID), m))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(message.Text)
 	for update := range updates {
 		reply := ""
 
-		documentBytes := update.Message.Document
-		documentFileName := update.Message.Document.FileName
-		documentFileBytes := tgbotapi.FileBytes{
-			Name:  "documentFileName",
-			Bytes: documentBytes,
-		}
-		if err != nil {
-			panic(err)
-		}
-		message, err := bot.Send(tgbotapi.NewDocumentUpload(int64(chatID), documentFileBytes))
-		if err != nil {
-			panic(err)
+		// documentBytes := update.Message.Document
+		// documentFileName := update.Message.Document.FileName
+		// documentFileBytes := tgbotapi.FileBytes{
+		// 	Name:  "documentFileName",
+		// 	Bytes: documentBytes,
+		// }
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// message, err := bot.Send(tgbotapi.NewDocumentUpload(int64(chatID), documentFileBytes))
+		// if err != nil {
+		// 	panic(err)
 
-		}
-		//------Заглушка на будущее--------
-		fmt.Println(message.Text)
+		// }
+		// //------Заглушка на будущее--------
+		// fmt.Println(message.Text)
 
-		if err != nil {
-			panic(err)
+		// if err != nil {
+		// 	panic(err)
 
-		}
+		// }
 
-		err = ioutil.WriteFile("output.txt", b, 0644)
-		if err != nil {
-			panic(err)
-		}
+		// err = ioutil.WriteFile("output.txt", b, 0644)
+		// if err != nil {
+		// 	panic(err)
+		// }
 
 		if update.Message == nil {
 			continue
