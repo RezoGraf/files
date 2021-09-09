@@ -839,21 +839,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	m, err := bot.GetFile(tgbotapi.FileConfig{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = ioutil.WriteFile("output.txt", m, 0644)
-	if err != nil {
-		panic(err)
-	}
-	message, err := bot.Send(tgbotapi.NewDocumentUpload(int64(chatID), m))
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(message.Text)
+	// photoFileBytes := tgbotapi.FileBytes{
+	// 	Name:  "fileUplodedName",
+	// 	Bytes: m,
+	// }
+
+	// message, err := bot.Send(tgbotapi.NewDocumentUpload(int64(chatID), photoFileBytes))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(message.Text)
 	for update := range updates {
 		reply := ""
+
+		m, err := bot.GetFile(tgbotapi.FileConfig{})
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Print(m)
 
 		// documentBytes := update.Message.Document
 		// documentFileName := update.Message.Document.FileName
