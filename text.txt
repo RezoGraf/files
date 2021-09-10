@@ -1,0 +1,76 @@
+	// s := tgbotapi.BaseFile(tgbotapi.NewUpdate)
+	// bot.Send(tgbotapi.NewMessage(chatID, fmt.Sprint("Я живой; вот сайты которые буду мониторить: ", SiteList)))
+
+
+
+	// photoFileBytes := tgbotapi.FileBytes{
+	// 	Name:  "fileUplodedName",
+	// 	Bytes: m,
+	// }
+
+	// message, err := bot.Send(tgbotapi.NewDocumentUpload(int64(chatID), photoFileBytes))
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(message.Text)
+
+
+    
+		
+		// // // // //Обработка по Message, без команд с вызовом клавиатуры
+		//
+		// var numericKeyboard = tgbotapi.NewReplyKeyboard(
+		// 	tgbotapi.NewKeyboardButtonRow(
+		// 		tgbotapi.NewKeyboardButton("1"),
+		// 		tgbotapi.NewKeyboardButton("2"),
+		// 		tgbotapi.NewKeyboardButton("3"),
+		// 	),
+		// 	tgbotapi.NewKeyboardButtonRow(
+		// 		tgbotapi.NewKeyboardButton("4"),
+		// 		tgbotapi.NewKeyboardButton("5"),
+		// 		tgbotapi.NewKeyboardButton("6"),
+		// 	),
+		// )
+		//
+		// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		// switch update.Message.Text {
+		// case "open":
+		// 	msg.ReplyMarkup = numericKeyboard
+		// case "close":
+		// 	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		// }
+		//
+		// if _, err := bot.Send(msg); err != nil {
+		//     log.Panic(err)
+		// }
+		//
+		// // // // // //Конец блока обработки сообщений без команд с вызовом и закрытием клавиатуры
+
+
+
+		// case "download":
+		// 	s := tgbotapi.GetFile(update.Message.Document)
+		// 	reply = string(s)
+
+
+
+
+// func newPhotoUpload(chatID int64, file interface{}) PhotoConfig {
+// 	return PhotoConfig{
+// 		BaseFile: BaseFile{
+// 			BaseChat:    BaseChat{ChatID: chatID},
+// 			File:        file,
+// 			UseExisting: false,
+// 		},
+// 	}
+// }
+
+// func NewPhotoShare(chatID int64, fileID string) PhotoConfig {
+// 	return PhotoConfig{
+// 		BaseFile: BaseFile{
+// 			BaseChat:    BaseChat{ChatID: chatID},
+// 			FileID:      fileID,
+// 			UseExisting: true,
+// 		},
+// 	}
+// }
