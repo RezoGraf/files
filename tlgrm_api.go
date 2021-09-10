@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -13,10 +12,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"time"
 
 	// tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 	// tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/technoweenie/multipartstreamer"
@@ -524,6 +521,23 @@ func (bot *BotAPI) MakeRequest(endpoint string, params url.Values) (APIResponse,
 // 	return params, nil
 // }
 
+type AnimationConfig struct {
+	BaseFile
+	Duration  int
+	Caption   string
+	ParseMode string
+}
+
+func NewAnimationUpload(chatID int64, file interface{}) AnimationConfig {
+	return AnimationConfig{
+		BaseFile: BaseFile{
+			BaseChat:    BaseChat{ChatID: chatID},
+			File:        file,
+			UseExisting: false,
+		},
+	}
+}
+
 func (bot *BotAPI) GetFile(config FileConfig) (File, error) {
 	v := url.Values{}
 	v.Add("file_id", config.FileID)
@@ -560,74 +574,74 @@ func init() {
 		os.Exit(1)
 	}
 
-	load_list()
+	// load_list()
 }
 
 // ------------Отправка уведомлений бота--------------
-func send_notifications(bot *tgbotapi.BotAPI) {
-	for site, status := range SiteList {
-		if status != 200 {
-			alarm := fmt.Sprintf("CRIT - %s ; status: %v", site, status)
-			bot.Send(tgbotapi.NewMessage(chatID, alarm))
-		}
-	}
-}
+// func send_notifications(bot *tgbotapi.BotAPI) {
+// 	for site, status := range SiteList {
+// 		if status != 200 {
+// 			alarm := fmt.Sprintf("CRIT - %s ; status: %v", site, status)
+// 			bot.Send(tgbotapi.NewMessage(chatID, alarm))
+// 		}
+// 	}
+// }
 
 // ----------Сохранение списка сайтов для бота----------
-func save_list() {
-	data, err := json.Marshal(SiteList)
-	if err != nil {
-		panic(err)
-	}
-	err = ioutil.WriteFile(configFile, data, 0644)
-	if err != nil {
-		panic(err)
-	}
-}
+// func save_list() {
+// 	data, err := json.Marshal(SiteList)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	err = ioutil.WriteFile(configFile, data, 0644)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }
 
 // ---------Загрузка списка сайтов для бота
-func load_list() {
-	data, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		log.Printf("No such file - starting without config")
-		return
-	}
+// func load_list() {
+// 	data, err := ioutil.ReadFile(configFile)
+// 	if err != nil {
+// 		log.Printf("No such file - starting without config")
+// 		return
+// 	}
 
-	if err = json.Unmarshal(data, &SiteList); err != nil {
-		log.Printf("Cant read file - starting without config")
-		return
-	}
-	log.Print(data)
-}
+// 	if err = json.Unmarshal(data, &SiteList); err != nil {
+// 		log.Printf("Cant read file - starting without config")
+// 		return
+// 	}
+// 	log.Print(data)
+// }
 
 // -----------Мониторинг сайтов ботом--------
-func monitor(bot *tgbotapi.BotAPI) {
+// func monitor(bot *tgbotapi.BotAPI) {
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
+// 	tr := &http.Transport{
+// 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+// 	}
 
-	var httpclient = &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: tr,
-	}
+// 	var httpclient = &http.Client{
+// 		Timeout:   time.Second * 10,
+// 		Transport: tr,
+// 	}
 
-	for {
-		save_list()
-		for site := range SiteList {
-			response, err := httpclient.Get(site)
-			if err != nil {
-				SiteList[site] = 1
-				log.Printf("Status of %s: %s", site, "1 - Connection refused")
-			} else {
-				log.Printf("Status of %s: %s", site, response.Status)
-				SiteList[site] = response.StatusCode
-			}
-		}
-		send_notifications(bot)
-		time.Sleep(time.Minute * 5)
-	}
-}
+// 	for {
+// 		save_list()
+// 		for site := range SiteList {
+// 			response, err := httpclient.Get(site)
+// 			if err != nil {
+// 				SiteList[site] = 1
+// 				log.Printf("Status of %s: %s", site, "1 - Connection refused")
+// 			} else {
+// 				log.Printf("Status of %s: %s", site, response.Status)
+// 				SiteList[site] = response.StatusCode
+// 			}
+// 		}
+// 		send_notifications(bot)
+// 		time.Sleep(time.Minute * 5)
+// 	}
+// }
 
 func (bot *BotAPI) UploadFile(endpoint string, params map[string]string, fieldname string, file interface{}) (APIResponse, error) {
 	ms := multipartstreamer.New()

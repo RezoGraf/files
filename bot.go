@@ -9,16 +9,12 @@ import (
 func botStart() (tgbotapi.UpdatesChannel, *tgbotapi.BotAPI, error) {
 	// используя токен создаем новый инстанс бота
 	bot, err := tgbotapi.NewBotAPI(telegramBotToken)
-	if err != nil {
-		log.Panic(err)
-	}
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 	log.Printf("Config file: %s", configFile)
 	log.Printf("ChatID: %v", chatID)
 	log.Printf("Starting monitoring thread")
-	go monitor(bot)
-
+	// go monitor(bot)
 	updateConfig := tgbotapi.NewUpdate(0)
 	updateConfig.Timeout = 60
 
@@ -26,5 +22,6 @@ func botStart() (tgbotapi.UpdatesChannel, *tgbotapi.BotAPI, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// updates2, err := bot.GetFile(tgbotapi.FileConfig{})
 	return updates, bot, nil
 }

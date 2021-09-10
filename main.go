@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -48,17 +49,35 @@ var (
 
 func main() {
 	updates, bot, _ := botStart()
+
+	// fileInfo, _ := bot.GetFile(Message.Document.FileID)
+
+	var data []byte
+
+	file := tgbotapi.FileBytes{
+		Name:  "text.txt",
+		Bytes: data,
+	}
+
+	err := os.WriteFile("text2.txt", file.Bytes, 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("проверяй файл")
 	// Работа с полученными обновлениями в чате
 	for update := range updates {
 		reply := ""
 
-		if update.Message == nil { // ignore any non-Message updates
-			continue
-		}
+		// if update.Message == nil { // ignore any non-Message updates
+		// 	continue
+		// }
 
-		if !update.Message.IsCommand() { // ignore any non-command Messages
-			continue
-		}
+		// if !update.Message.IsCommand() { // ignore any non-command Messages
+		// 	continue
+		// }
+
+		// var data []byte
 
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
@@ -96,16 +115,16 @@ func main() {
 			fileUplodedName := "133.gif"
 			photoBytes, err := ioutil.ReadFile(fileUplodedName)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 			photoFileBytes := tgbotapi.FileBytes{
 				Name:  "fileUplodedName",
 				Bytes: photoBytes,
 			}
 
-			message, err := bot.Send(tgbotapi.NewPhotoUpload(int64(chatID), photoFileBytes))
+			message, err := bot.Send(tgbotapi.NewVideoUpload(int64(chatID), photoFileBytes))
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 
 			}
 			//------Заглушка на будущее--------
@@ -125,9 +144,9 @@ func main() {
 		bot.Send(msg)
 
 		// -----Отправка сообщения с контролем на ошибку
-		if _, err := bot.Send(msg); err != nil {
-			log.Panic(err)
-		}
+		// if _, err := bot.Send(msg); err != nil {
+		// 	log.Panic(err)
+		// }
 		// -----Конец отправки сообщения с контролем на ошибку
 
 		// ----------------работа с процессом и файлами---------------//
