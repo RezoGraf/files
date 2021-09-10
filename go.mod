@@ -2,9 +2,6 @@ module files
 
 go 1.17
 
-require (
-	github.com/Syfaro/telegram-bot-api v4.6.4+incompatible // indirect
-	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
-	github.com/lib/pq v1.10.3 // indirect
-	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-)
+require github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1
+
+require github.com/technoweenie/multipartstreamer v1.0.1 // indirect
