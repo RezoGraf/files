@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func botStart() (tgbotapi.UpdatesChannel, *tgbotapi.BotAPI, error) {
@@ -22,7 +22,7 @@ func botStart() (tgbotapi.UpdatesChannel, *tgbotapi.BotAPI, error) {
 	updateConfig := tgbotapi.NewUpdate(0)
 	updateConfig.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(updateConfig)
+	updates := bot.GetUpdatesChan(updateConfig)
 	if err != nil {
 		log.Fatal(err)
 	}

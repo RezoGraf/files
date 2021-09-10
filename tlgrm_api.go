@@ -13,10 +13,12 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	// tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+
+	// tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/technoweenie/multipartstreamer"
 )
 
@@ -483,44 +485,44 @@ func (bot *BotAPI) MakeRequest(endpoint string, params url.Values) (APIResponse,
 	return apiResp, nil
 }
 
-func (file BaseFile) getFile() interface{} {
-	return file.File
-}
+// func (file BaseFile) getFile() interface{} {
+// 	return file.File
+// }
 
-func (file BaseFile) params() (map[string]string, error) {
-	params := make(map[string]string)
+// func (file BaseFile) params() (map[string]string, error) {
+// 	params := make(map[string]string)
 
-	if file.ChannelUsername != "" {
-		params["chat_id"] = file.ChannelUsername
-	} else {
-		params["chat_id"] = strconv.FormatInt(file.ChatID, 10)
-	}
+// 	if file.ChannelUsername != "" {
+// 		params["chat_id"] = file.ChannelUsername
+// 	} else {
+// 		params["chat_id"] = strconv.FormatInt(file.ChatID, 10)
+// 	}
 
-	if file.ReplyToMessageID != 0 {
-		params["reply_to_message_id"] = strconv.Itoa(file.ReplyToMessageID)
-	}
+// 	if file.ReplyToMessageID != 0 {
+// 		params["reply_to_message_id"] = strconv.Itoa(file.ReplyToMessageID)
+// 	}
 
-	if file.ReplyMarkup != nil {
-		data, err := json.Marshal(file.ReplyMarkup)
-		if err != nil {
-			return params, err
-		}
+// 	if file.ReplyMarkup != nil {
+// 		data, err := json.Marshal(file.ReplyMarkup)
+// 		if err != nil {
+// 			return params, err
+// 		}
 
-		params["reply_markup"] = string(data)
-	}
+// 		params["reply_markup"] = string(data)
+// 	}
 
-	if file.MimeType != "" {
-		params["mime_type"] = file.MimeType
-	}
+// 	if file.MimeType != "" {
+// 		params["mime_type"] = file.MimeType
+// 	}
 
-	if file.FileSize > 0 {
-		params["file_size"] = strconv.Itoa(file.FileSize)
-	}
+// 	if file.FileSize > 0 {
+// 		params["file_size"] = strconv.Itoa(file.FileSize)
+// 	}
 
-	params["disable_notification"] = strconv.FormatBool(file.DisableNotification)
+// 	params["disable_notification"] = strconv.FormatBool(file.DisableNotification)
 
-	return params, nil
-}
+// 	return params, nil
+// }
 
 func (bot *BotAPI) GetFile(config FileConfig) (File, error) {
 	v := url.Values{}
@@ -595,7 +597,7 @@ func load_list() {
 		log.Printf("Cant read file - starting without config")
 		return
 	}
-	log.Printf(string(data))
+	log.Print(data)
 }
 
 // -----------Мониторинг сайтов ботом--------
@@ -612,7 +614,7 @@ func monitor(bot *tgbotapi.BotAPI) {
 
 	for {
 		save_list()
-		for site, _ := range SiteList {
+		for site := range SiteList {
 			response, err := httpclient.Get(site)
 			if err != nil {
 				SiteList[site] = 1
@@ -714,23 +716,23 @@ func (bot *BotAPI) UploadFile(endpoint string, params map[string]string, fieldna
 	return apiResp, nil
 }
 
-func (bot *BotAPI) uploadAndSend(method string, config Fileable) (Message, error) {
-	params, err := config.params()
-	if err != nil {
-		return Message{}, err
-	}
+// func (bot *BotAPI) uploadAndSend(method string, config Fileable) (Message, error) {
+// 	params, err := config.params()
+// 	if err != nil {
+// 		return Message{}, err
+// 	}
 
-	file := config.getFile()
+// 	file := config.getFile()
 
-	resp, err := bot.UploadFile(method, params, config.name(), file)
-	if err != nil {
-		return Message{}, err
-	}
+// 	resp, err := bot.UploadFile(method, params, config.name(), file)
+// 	if err != nil {
+// 		return Message{}, err
+// 	}
 
-	var message Message
-	json.Unmarshal(resp.Result, &message)
+// 	var message Message
+// 	json.Unmarshal(resp.Result, &message)
 
-	bot.debugLog(method, nil, message)
+// 	bot.debugLog(method, nil, message)
 
-	return message, nil
-}
+// 	return message, nil
+// }
