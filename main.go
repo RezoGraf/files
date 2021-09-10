@@ -865,7 +865,7 @@ func main() {
 		// 	Bytes: documentBytes,
 		// }
 		// if err != nil {
-		// 	panic(err)
+		// 	panic(err)g
 		// }
 		// message, err := bot.Send(tgbotapi.NewDocumentUpload(int64(chatID), documentFileBytes))
 		// if err != nil {
